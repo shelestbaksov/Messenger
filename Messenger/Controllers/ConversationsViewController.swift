@@ -18,7 +18,7 @@ class ConversationsViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         validateAuth()
-        DatabaseManager.shared.test()
+        
     }
     
     private func validateAuth() {
