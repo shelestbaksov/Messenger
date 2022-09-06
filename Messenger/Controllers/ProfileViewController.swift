@@ -8,6 +8,7 @@
 import UIKit
 import FirebaseAuth
 
+
 class ProfileViewController: UIViewController {
 
     @IBOutlet var tableView: UITableView!
@@ -47,7 +48,10 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         actionSheet.addAction(UIAlertAction(title: "Log out",
                                             style: .destructive,
                                             handler: { [weak self] _ in
+            
             guard let strongSelf = self else { return }
+            
+            //Log out Firebase
             do {
                 try FirebaseAuth.Auth.auth().signOut()
                 let loginVC = LoginViewController()
