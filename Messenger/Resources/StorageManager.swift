@@ -8,6 +8,11 @@
 import Foundation
 import FirebaseStorage
 
+public enum StorageErrors: Error {
+    case failedToUpload
+    case failedToDowloadUrl
+}
+
 final class StorageManager {
     static let shared = StorageManager()
     
@@ -21,22 +26,20 @@ final class StorageManager {
             guard error == nil else {
                 print("failed to upload data to firebase")
                 completion(.failure(StorageErrors.failedToUpload))
+                return
             }
             
             self.storage.child("images/\(fileName)").downloadURL { url, error in
                 guard let url = url else {
                     print("Failed to download URL")
                     completion(.failure(StorageErrors.failedToDowloadUrl))
+                    return
                 }
                 
                 let urlString = url.absoluteString
                 print("download url returned: \(urlString)")
+                completion(.success(urlString))
             }
         }
-    }
-    
-    public enum StorageErrors: Error {
-        case failedToUpload
-        case failedToDowloadUrl
     }
 }

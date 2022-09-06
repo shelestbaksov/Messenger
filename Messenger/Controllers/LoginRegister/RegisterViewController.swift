@@ -198,6 +198,7 @@ class RegisterViewController: UIViewController {
               }
         spinner.show(in: view)
         DatabaseManager.shared.userExists(with: email) { [weak self] exists in
+            
             guard let strongSelf = self else { return }
             
             DispatchQueue.main.async {
@@ -215,11 +216,28 @@ class RegisterViewController: UIViewController {
                     print("Error creating an account")
                     return
                 }
-                DatabaseManager.shared.insertUser(with: ChatAppUser(
+                
+                let chatUser = ChatAppUser(
                     firstName: firstName,
                     lastName: lastName,
                     emailAddress: email)
-                )
+                DatabaseManager.shared.insertUser(with: chatUser) { success in
+                    if success {
+                        // upload image
+                        guard let image = strongSelf.imageView.image, let data = image.pngData() else { return }
+                        let fileName = chatUser.profilePictureFileName
+                        StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName) { result in
+                            switch result {
+                            case .success(let downloadURL):
+                                UserDefaults.standard.set(downloadURL, forKey: "profile_picture_url")
+                                print(downloadURL)
+                            case .failure(let error):
+                                print("StorageManager error: \(error)")
+                            }
+                        }
+                    }
+                }
+                
                 strongSelf.navigationController?.dismiss(animated: true, completion: nil)
             }
         }

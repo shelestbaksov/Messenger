@@ -66,9 +66,9 @@ PODS:
     - FirebaseCore (~> 9.0)
     - FirebaseCoreExtension (~> 9.0)
     - FirebaseStorageInternal (~> 9.0)
-  - FirebaseStorageInternal (9.4.0):
+  - FirebaseStorageInternal (9.5.0):
     - FirebaseCore (~> 9.0)
-    - GTMSessionFetcher/Core (< 3.0, >= 1.7)
+    - GTMSessionFetcher/Core (< 2.1, >= 1.7)
   - GoogleAppMeasurement (9.5.0):
     - GoogleAppMeasurement/AdIdSupport (= 9.5.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.7)
@@ -112,7 +112,7 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (7.7.0):
     - GoogleUtilities/Logger
-  - GTMSessionFetcher/Core (2.1.0)
+  - GTMSessionFetcher/Core (2.0.0)
   - InputBarAccessoryView (5.5.0):
     - InputBarAccessoryView/Core (= 5.5.0)
   - InputBarAccessoryView/Core (5.5.0)
@@ -187,11 +187,11 @@ SPEC CHECKSUMS:
   FirebaseDatabase: 0e2d3b1c935bb5ae704afc2f5c0adda365102312
   FirebaseInstallations: 41f811b530c41dd90973d0174381cdb3fcb5e839
   FirebaseStorage: a806d9f9eededf6fb1d906e79221b83ada1dbb4f
-  FirebaseStorageInternal: 425c7dc7de44d9b7e07a9f8d6515bab0f1266b87
+  FirebaseStorageInternal: 4f8a9e27391a99ac0692adbbd072fe0e5c4125fe
   GoogleAppMeasurement: 6ee231473fbd75c11221dfce489894334024eead
   GoogleDataTransport: 1c8145da7117bd68bbbed00cf304edb6a24de00f
   GoogleUtilities: e0913149f6b0625b553d70dae12b49fc62914fd1
-  GTMSessionFetcher: ffbb25ec00ebcb5201adab0a56d808f6f1902d9f
+  GTMSessionFetcher: 681175626052e03fdde7952f7e9c7a9785719506
   InputBarAccessoryView: 1d7b0a672b36e370f01f264b3907ef39d03328e3
   JGProgressHUD: d83d7a981b85d11205e19ff8ad5bb9c40571c847
   leveldb-library: 50c7b45cbd7bf543c81a468fe557a16ae3db8729
@@ -202,6 +202,6 @@ SPEC CHECKSUMS:
   RealmSwift: 7c38e0acca7d3df9cc60d79c073ef68245351d0e
   SDWebImage: 72f86271a6f3139cc7e4a89220946489d4b9a866
 
-PODFILE CHECKSUM: bce612bb1fe39133420e23de091bcf8cc0924301
+PODFILE CHECKSUM: 3e0b4ecda63e214487ca609961ef19fb740d1f19
 
 COCOAPODS: 1.11.2
