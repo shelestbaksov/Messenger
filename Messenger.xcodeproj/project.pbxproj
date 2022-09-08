@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		400FC23428C9DA72009CC30E /* ChatAppUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400FC23328C9DA72009CC30E /* ChatAppUser.swift */; };
 		409EA0C728C737D3007DDE36 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409EA0C628C737D3007DDE36 /* ChatViewController.swift */; };
 		409EA0C928C74E0C007DDE36 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409EA0C828C74E0C007DDE36 /* StorageManager.swift */; };
 		40D588F228C0E28000FC157E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D588F128C0E28000FC157E /* AppDelegate.swift */; };
@@ -29,6 +30,7 @@
 
 /* Begin PBXFileReference section */
 		35A25F5A1351EA0BAB930703 /* Pods_Messenger.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Messenger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		400FC23328C9DA72009CC30E /* ChatAppUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatAppUser.swift; sourceTree = "<group>"; };
 		409EA0C628C737D3007DDE36 /* ChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
 		409EA0C828C74E0C007DDE36 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
 		40D588EE28C0E28000FC157E /* Messenger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Messenger.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -130,6 +132,7 @@
 		40D5890728C0E4F700FC157E /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				400FC23328C9DA72009CC30E /* ChatAppUser.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -304,6 +307,7 @@
 				40D5891228C0E6EA00FC157E /* VideoPlayerViewController.swift in Sources */,
 				40D5891928C0EFC300FC157E /* Extensions.swift in Sources */,
 				40D588F228C0E28000FC157E /* AppDelegate.swift in Sources */,
+				400FC23428C9DA72009CC30E /* ChatAppUser.swift in Sources */,
 				40D5891628C0E73400FC157E /* ProfileViewController.swift in Sources */,
 				40D588F428C0E28000FC157E /* SceneDelegate.swift in Sources */,
 				409EA0C728C737D3007DDE36 /* ChatViewController.swift in Sources */,
