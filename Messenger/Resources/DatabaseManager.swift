@@ -104,7 +104,8 @@ extension DatabaseManager {
 extension DatabaseManager {
     /// creates a new conversation with target user email and first message sent
     public func createNewConversation(with otherUserEmail: String, firstmessage: Message, name: String, completion: @escaping (Bool) -> Void) {
-        guard let currentemail = UserDefaults.standard.value(forKey: "email") as? String else { return }
+        guard let currentemail = UserDefaults.standard.value(forKey: "email") as? String,
+              let currentName = UserDefaults.standard.value(forKey: "name") as? String else { return }
         
         let safeEmail = DatabaseManager.safeEmail(emailAddress: currentemail)
         
@@ -162,7 +163,7 @@ extension DatabaseManager {
             [
                 "id": conversationID,
                 "otherUserEmail": safeEmail,
-                "name": "Self",
+                "name": currentName,
                 "latestMessage": [
                     "date": dateString,
                     "message": message,
@@ -344,7 +345,82 @@ extension DatabaseManager {
         }
     }
     /// Sends a message with target conversation and message
-    public func sendMessage(to conversation: String, message: Message, completion: @escaping (Bool) -> Void) {
-        
+    public func sendMessage(to conversation: String, name: String, newMessage: Message, completion: @escaping (Bool) -> Void) {
+        // add new message to mssgs
+        // update sender latest mssg
+        //update recepient latest mssg
+        database.child("\(conversation)/messages").observeSingleEvent(of: .value) { [weak self] snapshot in
+            guard let strongSelf = self else { return }
+            guard var currentMessages = snapshot.value as? [[String: Any]] else {
+                completion(false)
+                return
+            }
+            
+            let messageDate = newMessage.sentDate
+            let dateString = ChatViewController.dateFormatter.string(from: messageDate)
+            
+            var message = ""
+            
+            switch newMessage.kind {
+            case .text(let messageText):
+                message = messageText
+            case .attributedText(_):
+                break
+            case .photo(_):
+                break
+            case .video(_):
+                break
+            case .location(_):
+                break
+            case .emoji(_):
+                break
+            case .audio(_):
+                break
+            case .contact(_):
+                break
+            case .linkPreview(_):
+                break
+            case .custom(_):
+                break
+            }
+            
+            guard let myEmail = UserDefaults.standard.value(forKey: "email") as? String else {
+                completion(false)
+                return
+            }
+            
+            let currentUserEmail = DatabaseManager.safeEmail(emailAddress: myEmail)
+            
+            let newMessageEntry: [String: Any] = [
+                "id": newMessage.messageId,
+                "type": newMessage.kind.messageKindString,
+                "content": message,
+                "date": dateString,
+                "senderEmail": currentUserEmail,
+                "isRead": false,
+                "name": name
+            ]
+            
+            currentMessages.append(newMessageEntry)
+            strongSelf.database.child("\(conversation)/messages").setValue(currentMessages) { error, _ in
+                guard error == nil else {
+                    completion(false)
+                    return
+                }
+                completion(true)
+            }
+        }
+    }
+}
+
+extension DatabaseManager {
+    public func getDataFor(path: String, completion: @escaping (Result<Any, Error>) -> Void) {
+        self.database.child("\(path)").observeSingleEvent(of: .value) { snapshot in
+            guard let value = snapshot.value else {
+                completion(.failure(DatabaseError.failedToFetch))
+                return
+            }
+            completion(.success(value))
+        }
     }
 }
