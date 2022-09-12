@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseDatabase
+import MessageKit
 
 public enum DatabaseError: Error {
     case failedToFetch
@@ -296,12 +297,12 @@ extension DatabaseManager {
             }
             let converations: [Conversation] = value.compactMap({ dictionary in
                 guard let conversationId = dictionary["id"] as? String,
-                        let name = dictionary["name"] as? String,
-                        let otherUserEmail = dictionary["otherUserEmail"] as? String,
-                        let latestMessage = dictionary["latestMessage"] as? [String: Any],
-                        let date = latestMessage["date"] as? String,
-                        let message = latestMessage["message"] as? String,
-                        let isRead = latestMessage["isRead"] as? Bool else {
+                      let name = dictionary["name"] as? String,
+                      let otherUserEmail = dictionary["otherUserEmail"] as? String,
+                      let latestMessage = dictionary["latestMessage"] as? [String: Any],
+                      let date = latestMessage["date"] as? String,
+                      let message = latestMessage["message"] as? String,
+                      let isRead = latestMessage["isRead"] as? Bool else {
                     return nil
                 }
                 let latestMessageObject = LatestMessage(date: date,
@@ -332,23 +333,45 @@ extension DatabaseManager {
                       let senderEmail = dictionary["senderEmail"] as? String,
                       let type = dictionary["type"] as? String else { return nil}
                 
+                var kind: MessageKind?
+                if type == "photo" {
+                    guard let imageUrl = URL(string: content), let placeHolder = UIImage(systemName: "plus") else { return nil }
+                    let media = Media(url: imageUrl,
+                                      image: nil,
+                                      placeholderImage: placeHolder,
+                                      size: CGSize(width: 300, height: 300))
+                    kind = .photo(media)
+                } else {
+                    kind = .text(content)
+                }
+                
+                guard let finalKind = kind else { return nil }
+                
                 let sender = Sender(photoURL: "",
                                     senderId: senderEmail,
                                     displayName: name)
                 
+                
                 return Message(sender: sender,
                                messageId: messageId,
                                sentDate: date,
-                               kind: .text(content))
+                               kind: finalKind)
             })
             completion(.success(messages))
         }
     }
     /// Sends a message with target conversation and message
-    public func sendMessage(to conversation: String, name: String, newMessage: Message, completion: @escaping (Bool) -> Void) {
+    public func sendMessage(to conversation: String, otherUserEmail: String, name: String, newMessage: Message, completion: @escaping (Bool) -> Void) {
         // add new message to mssgs
         // update sender latest mssg
         //update recepient latest mssg
+        
+        guard let myEmail = UserDefaults.standard.value(forKey: "email") as? String else {
+            completion(false)
+            return
+        }
+        let currentEmail = DatabaseManager.safeEmail(emailAddress: myEmail)
+        
         database.child("\(conversation)/messages").observeSingleEvent(of: .value) { [weak self] snapshot in
             guard let strongSelf = self else { return }
             guard var currentMessages = snapshot.value as? [[String: Any]] else {
@@ -366,8 +389,10 @@ extension DatabaseManager {
                 message = messageText
             case .attributedText(_):
                 break
-            case .photo(_):
-                break
+            case .photo(let mediaItem):
+                if let targetUrlString = mediaItem.url?.absoluteString{
+                    message = targetUrlString
+                }
             case .video(_):
                 break
             case .location(_):
@@ -407,7 +432,80 @@ extension DatabaseManager {
                     completion(false)
                     return
                 }
-                completion(true)
+                strongSelf.database.child("\(currentEmail)/conversations").observeSingleEvent(of: .value) { snapshot in
+                    guard var currentUserConversations = snapshot.value as? [[String: Any]] else {
+                        completion(false)
+                        return
+                    }
+                    
+                    let updatedValue: [String: Any] = [
+                        "date": dateString,
+                        "message": message,
+                        "isRead": false
+                    ]
+                    
+                    var targetConversation: [String: Any]?
+                    var position = 0
+                    
+                    for conversationDictionary in currentUserConversations {
+                        if let currentId = conversationDictionary["id"] as? String, currentId == conversation {
+                            targetConversation = conversationDictionary
+                            break
+                        }
+                        position += 1
+                    }
+                    targetConversation?["latestMessage"] = updatedValue
+                    guard let finalConversation = targetConversation else {
+                        completion(false)
+                        return
+                    }
+                    currentUserConversations[position] = finalConversation
+                    strongSelf.database.child("\(currentEmail)/conversations").setValue(currentUserConversations) { error, _ in
+                        guard error == nil else {
+                            completion(false)
+                            return
+                        }
+                        
+                        // update latest messege for recipient user
+                        
+                        strongSelf.database.child("\(otherUserEmail)/conversations").observeSingleEvent(of: .value) { snapshot in
+                            guard var otherUserConversations = snapshot.value as? [[String: Any]] else {
+                                completion(false)
+                                return
+                            }
+                            
+                            let updatedValue: [String: Any] = [
+                                "date": dateString,
+                                "message": message,
+                                "isRead": false
+                            ]
+                            
+                            var targetConversation: [String: Any]?
+                            var position = 0
+                            
+                            for conversationDictionary in otherUserConversations {
+                                if let currentId = conversationDictionary["id"] as? String, currentId == conversation {
+                                    targetConversation = conversationDictionary
+                                    break
+                                }
+                                position += 1
+                            }
+                            targetConversation?["latestMessage"] = updatedValue
+                            guard let finalConversation = targetConversation else {
+                                completion(false)
+                                return
+                            }
+                            otherUserConversations[position] = finalConversation
+                            strongSelf.database.child("\(otherUserEmail)/conversations").setValue(otherUserConversations) { error, _ in
+                                guard error == nil else {
+                                    completion(false)
+                                    return
+                                }
+                                completion(true)
+                            }
+                        }
+                    }
+                }
             }
         }
     }

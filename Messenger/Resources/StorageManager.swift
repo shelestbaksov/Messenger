@@ -54,4 +54,26 @@ final class StorageManager {
             completion(.success(url))
         }
     }
+    /// Upload image that will be sent in the convo mssg
+    public func uploadMessagePhoto(with data: Data, fileName: String, completion: @escaping UploadPictureCompletion) {
+        storage.child("messegeImages/\(fileName)").putData(data, metadata: nil) { metadata, error in
+            guard error == nil else {
+                print("failed to upload data to firebase")
+                completion(.failure(StorageErrors.failedToUpload))
+                return
+            }
+            
+            self.storage.child("messegeImages/\(fileName)").downloadURL { url, error in
+                guard let url = url else {
+                    print("Failed to download URL")
+                    completion(.failure(StorageErrors.failedToDowloadUrl))
+                    return
+                }
+                
+                let urlString = url.absoluteString
+                print("download url returned: \(urlString)")
+                completion(.success(urlString))
+            }
+        }
+    }
 }
