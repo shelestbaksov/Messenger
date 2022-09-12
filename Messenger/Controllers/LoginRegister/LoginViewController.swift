@@ -68,9 +68,10 @@ class LoginViewController: UIViewController {
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
         return button
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         title = "Log In"
         view.backgroundColor = .white
         
