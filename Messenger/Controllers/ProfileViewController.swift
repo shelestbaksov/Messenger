@@ -47,7 +47,8 @@ class ProfileViewController: UIViewController {
                                                 handler: { [weak self] _ in
                 
                 guard let strongSelf = self else { return }
-                
+                UserDefaults.standard.set(nil, forKey: "email")
+                UserDefaults.standard.set(nil, forKey: "name")
                 //Log out Firebase
                 do {
                     try FirebaseAuth.Auth.auth().signOut()
