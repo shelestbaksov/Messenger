@@ -13,6 +13,7 @@ public enum StorageErrors: Error {
     case failedToDowloadUrl
 }
 
+/// Allows to get/fetch/upload files to firebase storage
 final class StorageManager {
     static let shared = StorageManager()
     
@@ -22,14 +23,15 @@ final class StorageManager {
     
     /// Uploads picture to firebase storage and  returns completion with url string to download
     public func uploadProfilePicture(with data: Data, fileName: String, completion: @escaping UploadPictureCompletion) {
-        storage.child("images/\(fileName)").putData(data, metadata: nil) { metadata, error in
+        storage.child("images/\(fileName)").putData(data, metadata: nil) { [weak self] metadata, error in
+            guard let strongSelf = self else { return }
             guard error == nil else {
                 print("failed to upload data to firebase")
                 completion(.failure(StorageErrors.failedToUpload))
                 return
             }
             
-            self.storage.child("images/\(fileName)").downloadURL { url, error in
+            strongSelf.storage.child("images/\(fileName)").downloadURL { url, error in
                 guard let url = url else {
                     print("Failed to download URL")
                     completion(.failure(StorageErrors.failedToDowloadUrl))
@@ -54,6 +56,7 @@ final class StorageManager {
             completion(.success(url))
         }
     }
+    
     /// Upload image that will be sent in the convo mssg
     public func uploadMessagePhoto(with data: Data, fileName: String, completion: @escaping UploadPictureCompletion) {
         storage.child("messegeImages/\(fileName)").putData(data, metadata: nil) { [weak self] metadata, error in

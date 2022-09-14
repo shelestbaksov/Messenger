@@ -14,8 +14,9 @@ public enum DatabaseError: Error {
     case failedToFetch
 }
 
+/// Manager object to read and write data to real-time firebase database
 final class DatabaseManager {
-    
+    /// Shared instance of class
     static let shared = DatabaseManager()
     private let database = Database.database().reference()
     
@@ -47,14 +48,15 @@ extension DatabaseManager {
         database.child(user.safeEmail).setValue([
             "firstName": user.firstName,
             "lastName": user.lastName
-        ]) { error, _ in
+        ]) { [weak self] error, _ in
+            guard let strongSelf = self else { return }
             guard error == nil else {
                 print("Failed to write to database")
                 completion(false)
                 return
             }
             
-            self.database.child("users").observeSingleEvent(of: .value) { snapshot in
+            strongSelf.database.child("users").observeSingleEvent(of: .value) { snapshot in
                 if var usersCollection = snapshot.value as? [[String: String]] {
                     // append to user dictionary
                     let newElement = [
@@ -63,7 +65,7 @@ extension DatabaseManager {
                     ]
                     usersCollection.append(newElement)
                     
-                    self.database.child("users").setValue(usersCollection) { error, _ in
+                    strongSelf.database.child("users").setValue(usersCollection) { error, _ in
                         guard error == nil else {
                             completion(false)
                             return
@@ -78,7 +80,7 @@ extension DatabaseManager {
                             "email": user.safeEmail
                         ]
                     ]
-                    self.database.child("users").setValue(newCollection) { error, _ in
+                    strongSelf.database.child("users").setValue(newCollection) { error, _ in
                         guard error == nil else {
                             completion(false)
                             return
@@ -89,7 +91,7 @@ extension DatabaseManager {
             }
         }
     }
-    
+    /// Gets all users from database
     public func getAllusers(completion: @escaping (Result<[[String: String]], Error>) -> Void) {
         database.child("users").observeSingleEvent(of: .value) { snapshot in
             guard let value = snapshot.value as? [[String: String]] else {
@@ -219,37 +221,24 @@ extension DatabaseManager {
     }
     
     private func finishCreatingConversation(name: String, conversationID: String, firstMessage: Message, completion: @escaping (Bool) -> Void) {
-        //        {
-        //            "id": String,
-        //            "type": ,
-        //            "content": String,
-        //            "date": Date(),
-        //            "senderEmail": String,
-        //            "isRead": Bool
-        //        }
         
         var message = ""
         
         switch firstMessage.kind {
         case .text(let messageText):
             message = messageText
-        case .attributedText(_):
-            break
-        case .photo(_):
-            break
-        case .video(_):
-            break
-        case .location(_):
-            break
-        case .emoji(_):
-            break
-        case .audio(_):
-            break
-        case .contact(_):
-            break
-        case .linkPreview(_):
-            break
-        case .custom(_):
+        case .photo(let mediaItem):
+            if let targetUrlString = mediaItem.url?.absoluteString{
+                message = targetUrlString
+            }
+        case .video(let mediaItem):
+            if let targetUrlString = mediaItem.url?.absoluteString{
+                message = targetUrlString
+            }
+        case .location(let locationData):
+            let location = locationData.location
+            message = "\(location.coordinate.longitude), \(location.coordinate.latitude)"
+        default:
             break
         }
         
@@ -328,7 +317,7 @@ extension DatabaseManager {
                       let dateString = dictionary["date"] as? String,
                       let date = ChatViewController.dateFormatter.date(from: dateString),
                       let messageId = dictionary["id"] as? String,
-                      let isRead = dictionary["isRead"] as? Bool,
+//                      let isRead = dictionary["isRead"] as? Bool,
                       let name = dictionary["name"] as? String,
                       let senderEmail = dictionary["senderEmail"] as? String,
                       let type = dictionary["type"] as? String else { return nil}
@@ -404,8 +393,6 @@ extension DatabaseManager {
             switch newMessage.kind {
             case .text(let messageText):
                 message = messageText
-            case .attributedText(_):
-                break
             case .photo(let mediaItem):
                 if let targetUrlString = mediaItem.url?.absoluteString{
                     message = targetUrlString
@@ -417,15 +404,7 @@ extension DatabaseManager {
             case .location(let locationData):
                 let location = locationData.location
                 message = "\(location.coordinate.longitude), \(location.coordinate.latitude)"
-            case .emoji(_):
-                break
-            case .audio(_):
-                break
-            case .contact(_):
-                break
-            case .linkPreview(_):
-                break
-            case .custom(_):
+            default:
                 break
             }
             
@@ -569,6 +548,7 @@ extension DatabaseManager {
             }
         }
     }
+    
     public func deleteConversation(conversationId: String, completion: @escaping (Bool)-> Void) {
         guard let email = UserDefaults.standard.value(forKey: "email") as? String else { return }
         let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
@@ -599,6 +579,7 @@ extension DatabaseManager {
             }
         }
     }
+    
     public func conversationExists(with targetRecepientEmail: String, completion: @escaping (Result<String, Error>) -> Void) {
         let safeRecipientEmail = DatabaseManager.safeEmail(emailAddress: targetRecepientEmail)
         
@@ -631,8 +612,9 @@ extension DatabaseManager {
 }
 
 extension DatabaseManager {
+    /// returns dictionary for child path
     public func getDataFor(path: String, completion: @escaping (Result<Any, Error>) -> Void) {
-        self.database.child("\(path)").observeSingleEvent(of: .value) { snapshot in
+        database.child("\(path)").observeSingleEvent(of: .value) { snapshot in
             guard let value = snapshot.value else {
                 completion(.failure(DatabaseError.failedToFetch))
                 return

@@ -9,17 +9,7 @@ import UIKit
 import FirebaseAuth
 import SDWebImage
 
-enum ProfileViewModelType {
-    case info, logout
-}
-
-struct ProfileViewModel {
-    let viewModeltype: ProfileViewModelType
-    let title: String
-    let handler: (() -> Void)?
-}
-
-class ProfileViewController: UIViewController {
+final class ProfileViewController: UIViewController {
     
     @IBOutlet var tableView: UITableView!
     
@@ -73,6 +63,7 @@ class ProfileViewController: UIViewController {
         tableView.dataSource = self
         tableView.tableHeaderView = createTableHeader()
     }
+    
     func createTableHeader() -> UIView? {
         guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
             return nil
@@ -105,14 +96,12 @@ class ProfileViewController: UIViewController {
                 print("Failed tto get download URL: \(error)")
             }
         }
-        
         return headerView
     }
     
 }
 
 // MARK: - TableView
-
 extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return data.count
@@ -132,19 +121,20 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+// MARK: - UITableViewCell
 class ProfiletableViewCell: UITableViewCell {
     static let identifier = "ProfiletableViewCell"
     
     public func setup(with viewModel: ProfileViewModel) {
-
-        self.textLabel?.text = viewModel.title
+        
+        textLabel?.text = viewModel.title
         switch viewModel.viewModeltype {
         case .info:
-            self.textLabel?.textAlignment = .left
-            self.selectionStyle = .none
+            textLabel?.textAlignment = .left
+            selectionStyle = .none
         case .logout:
-            self.textLabel?.textColor = .red
-            self.textLabel?.textAlignment = .center
+            textLabel?.textColor = .red
+            textLabel?.textAlignment = .center
         }
     }
 }

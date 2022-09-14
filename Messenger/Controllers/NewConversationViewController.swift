@@ -8,7 +8,7 @@
 import UIKit
 import JGProgressHUD
 
-class NewConversationViewController: UIViewController {
+final class NewConversationViewController: UIViewController {
     
     public var completion: ((SearchResult) -> (Void))?
 
@@ -74,6 +74,7 @@ class NewConversationViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
 }
+
 //MARK: - TableView
 extension NewConversationViewController: UITableViewDelegate, UITableViewDataSource {
     
@@ -102,7 +103,7 @@ extension NewConversationViewController: UITableViewDelegate, UITableViewDataSou
     }
 }
 
-
+// MARK: - UISearchBarDelegate
 extension NewConversationViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -113,7 +114,7 @@ extension NewConversationViewController: UISearchBarDelegate {
         results.removeAll()
         spinner.show(in: view)
         
-        self.searchUsers(query: text)
+        searchUsers(query: text)
     }
     
     func searchUsers(query: String) {
@@ -132,14 +133,15 @@ extension NewConversationViewController: UISearchBarDelegate {
             }
         }
     }
+    
     func filterUsers(with term: String) {
         guard let currentUserEmail = UserDefaults.standard.value(forKey: "email") as? String, hasFetched else { return }
         
         let safeEmail = DatabaseManager.safeEmail(emailAddress: currentUserEmail)
         
-        self.spinner.dismiss()
+        spinner.dismiss()
         
-        let results: [SearchResult] = self.users.filter({
+        let results: [SearchResult] = users.filter({
             guard let email = $0["email"], email != safeEmail else { return false }
             guard let name = $0["name"]?.lowercased() as? String else { return false }
             return name.hasPrefix(term.lowercased())
@@ -157,19 +159,13 @@ extension NewConversationViewController: UISearchBarDelegate {
     
     func updateUI() {
         if results.isEmpty {
-            self.noResultslabel.isHidden = false
-            self.tableView.isHidden = true
+            noResultslabel.isHidden = false
+            tableView.isHidden = true
         } else {
-            self.tableView.isHidden = false
-            self.tableView.reloadData()
-            self.noResultslabel.isHidden = true
+            tableView.isHidden = false
+            tableView.reloadData()
+            noResultslabel.isHidden = true
         }
     }
-    
 }
 
-
-struct SearchResult {
-    let name: String
-    let email: String
-}

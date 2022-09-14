@@ -10,7 +10,7 @@ import FirebaseAuth
 import JGProgressHUD
 
 
-class LoginViewController: UIViewController {
+final class LoginViewController: UIViewController {
     
     private let spinner = JGProgressHUD(style: .dark)
     
@@ -188,6 +188,7 @@ class LoginViewController: UIViewController {
     }
 }
 
+// MARK: - UITextFieldDelegate
 extension LoginViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

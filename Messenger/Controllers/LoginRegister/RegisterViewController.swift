@@ -9,7 +9,7 @@ import UIKit
 import FirebaseAuth
 import JGProgressHUD
 
-class RegisterViewController: UIViewController {
+final class RegisterViewController: UIViewController {
     private let spinner = JGProgressHUD(style: .dark)
     
     private let scrollView: UIScrollView = {
@@ -266,6 +266,7 @@ class RegisterViewController: UIViewController {
     }
 }
 
+// MARK: - UITextFieldDelegate
 extension RegisterViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -278,6 +279,7 @@ extension RegisterViewController: UITextFieldDelegate {
     }
 }
 
+// MARK: - UIImagePickerControllerDelegate, UINavigationControllerDelegate
 extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     func presentPhotoActionSheet() {
@@ -328,7 +330,7 @@ extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationC
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true, completion: nil)
         guard let selectedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage else { return }
-        self.imageView.image = selectedImage
+        imageView.image = selectedImage
     }
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

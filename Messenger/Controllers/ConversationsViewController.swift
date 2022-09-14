@@ -9,7 +9,7 @@ import UIKit
 import FirebaseAuth
 import JGProgressHUD
 
-class ConversationsViewController: UIViewController {
+final class ConversationsViewController: UIViewController {
     
     private let spinner = JGProgressHUD(style: .dark)
     private var conversations = [Conversation]()
@@ -166,7 +166,6 @@ extension ConversationsViewController: UITableViewDelegate, UITableViewDataSourc
         return conversations.count
     }
     
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let model = conversations[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: ConversationTableViewCell.identifier,
@@ -180,12 +179,14 @@ extension ConversationsViewController: UITableViewDelegate, UITableViewDataSourc
         let model = conversations[indexPath.row]
         openConversation(model)
     }
+    
     func openConversation(_ model: Conversation) {
         let vc = ChatViewController(with: model.otherUserEmail, id: model.id)
         vc.title = model.name
         vc.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(vc, animated: true)
     }
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 120
     }
@@ -199,10 +200,11 @@ extension ConversationsViewController: UITableViewDelegate, UITableViewDataSourc
             // begin delete
             let conversationId = conversations[indexPath.row].id
             tableView.beginUpdates()
-            DatabaseManager.shared.deleteConversation(conversationId: conversationId) { [weak self] success in
-                if success {
-                    self?.conversations.remove(at: indexPath.row)
-                    tableView.deleteRows(at: [indexPath], with: .left)
+            self.conversations.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .left)
+            DatabaseManager.shared.deleteConversation(conversationId: conversationId) { success in
+                if !success {
+                    print("Failed to delete")
                 }
             }
             tableView.endUpdates()
